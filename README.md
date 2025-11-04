@@ -1,6 +1,9 @@
 # Agent-A11y-Bench: Accessibility Benchmark for Computer Use Agents
-> Madi, Brian, Jason
-> Credits to Browserbase for the Stagehand agent framewor. Credits to Webvoyager team for scaffolding around the underlying benchmark
+Madi, Brian, Jason
+
+Credits to Browserbase for the Stagehand agent framework.
+
+Credits to Webvoyager team for scaffolding around the underlying benchmark
 
 ### TL;DR on Stagehand API:
 
