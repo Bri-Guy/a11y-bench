@@ -98,3 +98,7 @@ scripts/
 
 # Logs
 *.log
+
+# Benchmark results
+results/
+!results/examples/
