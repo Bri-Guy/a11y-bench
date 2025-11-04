@@ -1,80 +1,146 @@
-# Agent-A11y-Bench: Accessibility Benchmark for Computer Use Agents
-Madi, Brian, Jason
+# A11y-Bench: Accessibility Benchmark for Computer Use Agents
 
-Credits to Browserbase for the Stagehand agent framework.
+> By Madi, Brian, Jason
 
-Credits to Webvoyager team for scaffolding around the underlying benchmark
+A benchmark for evaluating AI computer use agents on accessibility-related tasks.
 
-### TL;DR on Stagehand API:
+**Credits:**
+- [Browserbase](https://browserbase.com) for the Stagehand agent framework
+- [WebVoyager](https://github.com/MinorJerry/WebVoyager) team for the benchmark structure inspiration
 
-- **act** — Instruct the AI to perform actions (e.g. click a button or scroll).
-```python
-await stagehand.page.act("click on the 'Quickstart' button")
-```
-- **extract** — Extract and validate data from a page using a Pydantic schema.
-```python
-await stagehand.page.extract("the summary of the first paragraph")
-```
-- **observe** — Get natural language interpretations to, for example, identify selectors or elements from the page.
-```python
-await stagehand.page.observe("find the search bar")
-```
-- **agent** — Execute autonomous multi-step tasks with provider-specific agents (OpenAI, Anthropic, etc.).
-```python
-await stagehand.agent.execute("book a reservation for 2 people for a trip to the Maldives")
-```
+## Quick Start
 
-
-## Installation:
-
-To get started, simply:
-
-```bash
-pip install stagehand
-```
-
-> We recommend using [uv](https://docs.astral.sh/uv/) for your package/project manager. If you're using uv can follow these steps:
-
+1. **Install dependencies:**
 ```bash
 uv venv .venv
 source .venv/bin/activate
 uv pip install stagehand
 ```
 
-## Quickstart
-
-Check out ```examples/agent_example_local.py```
-
-## Documentation
-
-See our full documentation [here](https://docs.stagehand.dev/).
-
-## Cache Actions
-
-You can cache actions in Stagehand to avoid redundant LLM calls. This is particularly useful for actions that are expensive to run or when the underlying DOM structure is not expected to change.
-
-### Using `observe` to preview an action
-
-`observe` lets you preview an action before taking it. If you are satisfied with the action preview, you can run it in `page.act` with no further LLM calls.
-
-```python
-# Get the action preview
-action_preview = await page.observe("Click the quickstart link")
-
-# action_preview is a JSON-ified version of a Playwright action:
-# {
-#     "description": "The quickstart link",
-#     "method": "click",
-#     "selector": "/html/body/div[1]/div[1]/a",
-#     "arguments": []
-# }
-
-# NO LLM INFERENCE when calling act on the preview
-await page.act(action_preview[0])
+2. **Set up environment variables** (copy `.env.example` to `.env`):
+```bash
+MODEL_API_KEY=your_gemini_api_key
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
-If the website happens to change, `self_heal` will run the loop again to save you from constantly updating your scripts.
+3. **Run a single test:**
+```bash
+python run_single_test.py a11y_001
+```
 
+4. **Run the full benchmark:**
+```bash
+python run_benchmark.py
+```
+
+## Benchmark Overview
+
+The benchmark includes accessibility audit tasks across different categories:
+
+- TODO
+
+### Example Task
+
+```json
+{
+  "id": "a11y_001",
+  "task": "Navigate to Wikipedia homepage and verify all images have alt text",
+  "url": "https://www.wikipedia.org",
+  "category": "image_accessibility",
+  "difficulty": "easy",
+  "success_criteria": "All images on the homepage have non-empty alt attributes"
+}
+```
+
+## Usage
+
+### Run Single Task
+
+```bash
+# Basic usage
+python run_single_test.py a11y_001
+
+# With options
+python run_single_test.py a11y_001 --env BROWSERBASE --model gpt-4o
+```
+
+### Run Full Benchmark
+
+```bash
+# Run all tasks
+python run_benchmark.py
+
+# Filter by category
+python run_benchmark.py --category keyboard_navigation
+
+# Filter by difficulty
+python run_benchmark.py --difficulty easy
+
+# Run specific tasks
+python run_benchmark.py --task-ids a11y_001 a11y_002
+```
+
+## Project Structure
+
+```
+a11y-bench/
+├── data/
+│   └── accessibility_tasks.jsonl    # Benchmark tasks
+├── evaluation/
+│   ├── evaluate_results.py          # Evaluation script
+│   └── compare_runs.py              # Compare multiple runs
+├── results/                          # Results directory
+│   └── examples/                     # Example results
+├── utils.py                          # Utility functions
+├── run_single_test.py               # Single task runner
+└── run_benchmark.py                 # Full benchmark runner
+```
+
+## Adding New Tasks
+
+Add entries to `data/accessibility_tasks.jsonl`:
+
+```json
+{"id": "a11y_006", "task": "Your task description", "url": "https://example.com", "category": "category_name", "difficulty": "easy", "success_criteria": "Success criteria"}
+```
+
+## Evaluation
+
+Evaluate benchmark results:
+
+```bash
+python evaluation/evaluate_results.py --results-dir results
+```
+
+Compare multiple runs:
+
+```bash
+python evaluation/compare_runs.py results/summary1.json results/summary2.json
+```
+
+## Stagehand API Reference
+
+The benchmark uses Stagehand's agent API. Key methods:
+
+- **`page.goto(url)`** — Navigate to a URL
+- **`page.act(instruction)`** — Perform actions (click, type, etc.)
+- **`page.extract(instruction, schema)`** — Extract data from page
+- **`page.observe(instruction)`** — Get element information
+- **`agent(model, instructions)`** — Create an autonomous agent
+
+For full documentation, see [docs.stagehand.dev](https://docs.stagehand.dev/).
+
+## Examples
+
+Check out `examples/agent_example_local.py` for a complete Stagehand example.
+
+## Contributing
+
+To add new accessibility tasks:
+
+1. Add task to `data/accessibility_tasks.jsonl`
+2. Test with `python run_single_test.py <task_id>`
+3. Ensure all required fields are present (id, task, url, category, difficulty, success_criteria)
 
 ## License
 

@@ -1,0 +1,16 @@
+{
+    "task_id": "a11y_001",
+    "task": "Navigate to Wikipedia homepage and verify all images have alt text",
+    "url": "https://www.wikipedia.org",
+    "category": "image_accessibility",
+    "difficulty": "easy",
+    "success_criteria": "All images on the homepage have non-empty alt attributes",
+    "status": "PASS",
+    "completed": true,
+    "message": "Successfully navigated to Wikipedia homepage and verified that all images have alt text. Inspected 12 images on the page, and all had non-empty alt attributes providing meaningful descriptions.",
+    "actions_count": 8,
+    "duration_seconds": 15.42,
+    "timestamp": "2025-01-15T10:30:45.123456",
+    "model": "gemini-2.5-computer-use-preview-10-2025",
+    "env": "LOCAL"
+}
