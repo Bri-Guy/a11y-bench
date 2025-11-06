@@ -13,6 +13,7 @@ A benchmark for evaluating AI computer use agents on accessibility-related tasks
 1. **Install dependencies:**
 ```bash
 uv venv .venv
+uv sync
 source .venv/bin/activate
 uv pip install stagehand
 ```
