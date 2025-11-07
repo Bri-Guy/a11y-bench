@@ -118,10 +118,12 @@ Success Criteria: {task.get('success_criteria')}
 Please execute this task and provide a clear assessment.
 """
         
+        # Let each client read its own API key from environment variables
+        # Anthropic: ANTHROPIC_API_KEY, Google: GEMINI_API_KEY, OpenAI: OPENAI_API_KEY
         agent = stagehand.agent(
             model=model,
             instructions=task_instruction,
-            options={"apiKey": os.getenv("GEMINI_API_KEY")}
+            options={}  # API keys are read from env vars by each client automatically
         )
         
         start_time = datetime.now()
