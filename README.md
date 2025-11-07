@@ -16,6 +16,9 @@ uv venv .venv
 uv sync
 source .venv/bin/activate
 uv pip install stagehand
+
+# Optional: Install visualization tools
+uv sync --extra viz
 ```
 
 2. **Set up environment variables** (copy `.env.example` to `.env`):
@@ -89,9 +92,11 @@ a11y-bench/
 │   └── accessibility_tasks.jsonl    # Benchmark tasks
 ├── evaluation/
 │   ├── evaluate_results.py          # Evaluation script
-│   └── compare_runs.py              # Compare multiple runs
+│   ├── compare_runs.py              # Compare multiple runs
+│   └── visualize_results.py         # Generate performance graphs
 ├── results/                          # Results directory
-│   └── examples/                     # Example results
+│   ├── examples/                     # Example results
+│   └── visualizations/               # Generated graphs
 ├── utils.py                          # Utility functions
 ├── run_single_test.py               # Single task runner
 └── run_benchmark.py                 # Full benchmark runner
@@ -107,6 +112,8 @@ Add entries to `data/accessibility_tasks.jsonl`:
 
 ## Evaluation
 
+### Evaluate Results
+
 Evaluate benchmark results:
 
 ```bash
@@ -118,6 +125,36 @@ Compare multiple runs:
 ```bash
 python evaluation/compare_runs.py results/summary1.json results/summary2.json
 ```
+
+### Generate Visualizations
+
+Create publication-ready graphs comparing model performance:
+
+**1. Install visualization dependencies:**
+
+```bash
+uv sync --extra viz
+```
+
+**2. Generate graphs:**
+
+```bash
+# Compare 2 or more model providers
+python evaluation/visualize_results.py \
+  results/openai_corrected.json \
+  results/gemini_corrected.json \
+  results/anthropic_corrected.json \
+  -o results/visualizations
+```
+
+**Generated outputs:**
+- `overall_performance.png` - Bar chart comparing success rates across providers
+- `category_performance.png` - Performance breakdown by task category (motor, visual, etc.)
+- `difficulty_performance.png` - Performance breakdown by difficulty level (Easy, Moderate, Complex)
+- `median_duration.png` - Median time per successful task across providers
+- `summary_report.txt` - Detailed text summary of all statistics
+
+All graphs are high-resolution (300 DPI) and ready for research papers or presentations.
 
 ## Stagehand API Reference
 
