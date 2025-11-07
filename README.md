@@ -65,7 +65,7 @@ The benchmark includes accessibility audit tasks across different categories:
 python run_single_test.py a11y_001
 
 # With options
-python run_single_test.py a11y_001 --env BROWSERBASE --model gpt-4o
+python run_single_test.py a11y_001 --model claude-3-5-sonnet-latest
 ```
 
 ### Run Full Benchmark
