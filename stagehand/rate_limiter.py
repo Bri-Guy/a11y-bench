@@ -32,7 +32,6 @@ class RateLimitConfig:
 
 
 # Default rate limit configurations per provider
-# These are conservative defaults - users can override them
 DEFAULT_RATE_LIMITS: dict[Provider, RateLimitConfig] = {
     Provider.OPENAI: RateLimitConfig(
         requests_per_minute=500,  # GPT-4o tier 1 is ~500 RPM
@@ -86,7 +85,6 @@ class TokenBucket:
                 self.tokens -= tokens
                 return 0.0
             
-            # Calculate wait time
             tokens_needed = tokens - self.tokens
             wait_time = tokens_needed / self.refill_rate
             return wait_time
@@ -129,7 +127,6 @@ class RateLimiter:
         self._buckets: dict[Provider, TokenBucket] = {}
         self._logger = logger
         
-        # Initialize buckets for each provider
         for provider, config in self._configs.items():
             self._buckets[provider] = TokenBucket(capacity=config.requests_per_minute)
     
@@ -150,7 +147,6 @@ class RateLimiter:
         error_str = str(error).lower()
         error_type = type(error).__name__.lower()
         
-        # Common rate limit indicators
         rate_limit_indicators = [
             "rate_limit",
             "ratelimit",
@@ -181,7 +177,6 @@ class RateLimiter:
         jitter = delay * 0.25 * (2 * random.random() - 1)
         delay += jitter
         
-        # Cap at max_delay
         return min(delay, config.max_delay)
     
     async def execute(
@@ -216,7 +211,6 @@ class RateLimiter:
         last_exception: Optional[Exception] = None
         
         for attempt in range(config.max_retries + 1):
-            # Wait for rate limit bucket
             wait_time = await bucket.acquire()
             if wait_time > 0:
                 self._log(f"Rate limit: waiting {wait_time:.2f}s for {provider.value}")
@@ -286,7 +280,6 @@ class RateLimiter:
         last_exception: Optional[Exception] = None
         
         for attempt in range(config.max_retries + 1):
-            # Wait for rate limit bucket
             wait_time = await bucket.acquire()
             if wait_time > 0:
                 self._log(f"Rate limit: waiting {wait_time:.2f}s for {provider.value}")
