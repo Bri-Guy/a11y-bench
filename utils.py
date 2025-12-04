@@ -441,7 +441,7 @@ async def execute_task(
         await stagehand.page.goto(task.get('url'))
         
         initial_url = stagehand.page._page.url
-        initial_screenshot_bytes = await stagehand.page._page.screenshot(type="png")
+        initial_screenshot_bytes = await stagehand.page._page.screenshot(type="png", full_page=True)
         initial_screenshot_b64 = base64.b64encode(initial_screenshot_bytes).decode()
         
         task_instruction = f"Task: {task.get('task')}"
@@ -463,7 +463,7 @@ async def execute_task(
         execution_duration = (datetime.now() - start_time).total_seconds()
         
         final_url = stagehand.page._page.url
-        final_screenshot_bytes = await stagehand.page._page.screenshot(type="png")
+        final_screenshot_bytes = await stagehand.page._page.screenshot(type="png", full_page=True)
         final_screenshot_b64 = base64.b64encode(final_screenshot_bytes).decode()
         
         if not agent_result.completed:
