@@ -4,7 +4,6 @@ Main script to run the Accessibility Benchmark (A11y-Bench)
 
 import asyncio
 import argparse
-import os
 import traceback
 from dotenv import load_dotenv
 from rich.console import Console
@@ -18,14 +17,22 @@ from utils import (
     filter_tasks_by_difficulty,
     save_result,
     save_benchmark_summary,
-    execute_task
+    execute_task,
+    DEFAULT_EVALUATOR_MODEL,
 )
 
 console = Console()
 load_dotenv()
 
 
-async def run_benchmark(category=None, difficulty=None, task_ids=None, env="LOCAL", model="gemini-2.5-computer-use-preview-10-2025"):
+async def run_benchmark(
+    category=None,
+    difficulty=None,
+    task_ids=None,
+    env="LOCAL",
+    model="gemini-2.5-computer-use-preview-10-2025",
+    evaluator_model=DEFAULT_EVALUATOR_MODEL,
+):
     """Run the accessibility benchmark."""
     
     console.print("\n[cyan]Loading tasks...[/cyan]")
@@ -42,11 +49,12 @@ async def run_benchmark(category=None, difficulty=None, task_ids=None, env="LOCA
         console.print("[red]No tasks to run![/red]")
         return
     
-    console.print(f"[green]Running {len(tasks)} tasks[/green]\n")
+    console.print(f"[green]Running {len(tasks)} tasks[/green]")
+    console.print(f"[cyan]Agent model:[/cyan] {model}")
+    console.print(f"[cyan]Evaluator model:[/cyan] {evaluator_model}\n")
     
     config = StagehandConfig(
         env=env,
-        model_client_options={"apiKey": os.getenv("MODEL_API_KEY")},
         verbose=0
     )
     
@@ -63,7 +71,7 @@ async def run_benchmark(category=None, difficulty=None, task_ids=None, env="LOCA
         task_progress = progress.add_task("[cyan]Running tasks...", total=len(tasks))
         
         for task in tasks:
-            result = await execute_task(stagehand, task, model)
+            result = await execute_task(stagehand, task, model, evaluator_model)
             results.append(result)
             save_result(result)
             progress.update(task_progress, advance=1)
@@ -109,7 +117,10 @@ def main():
     parser.add_argument("--difficulty", choices=["easy", "medium", "hard"], help="Filter by difficulty")
     parser.add_argument("--task-ids", nargs="+", help="Specific task IDs to run")
     parser.add_argument("--env", choices=["LOCAL", "BROWSERBASE"], default="LOCAL")
-    parser.add_argument("--model", default="gemini-2.5-computer-use-preview-10-2025")
+    parser.add_argument("--model", default="gemini-2.5-computer-use-preview-10-2025",
+                        help="Agent model to use for task execution")
+    parser.add_argument("--evaluator-model", default=DEFAULT_EVALUATOR_MODEL,
+                        help=f"Model to use for verification (default: {DEFAULT_EVALUATOR_MODEL})")
     
     args = parser.parse_args()
     
@@ -119,7 +130,8 @@ def main():
             difficulty=args.difficulty,
             task_ids=args.task_ids,
             env=args.env,
-            model=args.model
+            model=args.model,
+            evaluator_model=args.evaluator_model,
         ))
     except KeyboardInterrupt:
         console.print("\n[yellow]Benchmark interrupted[/yellow]")
