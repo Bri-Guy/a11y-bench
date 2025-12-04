@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from pydantic import TypeAdapter
 
 from ..handlers.cua_handler import CUAHandler, StagehandFunctionName
+from ..rate_limiter import Provider, get_rate_limiter
 from ..types.agent import (
     ActionExecutionResult,
     AgentAction,
@@ -115,6 +116,7 @@ class AnthropicCUAClient(AgentClient):
         ]
         self.max_tokens = kwargs.get("max_tokens", 1024)
         self.last_tool_use_ids = None
+        self._rate_limiter = get_rate_limiter(logger=logger)
         self.logger.info(
             f"AnthropicCUAClient initialized for model: {model}",
             category=StagehandFunctionName.AGENT,
@@ -169,7 +171,10 @@ class AnthropicCUAClient(AgentClient):
                 if self.experimental:
                     compress_conversation_images(current_messages)
 
-                response = self.anthropic_sdk_client.beta.messages.create(
+                # Use rate limiter for API call with retry logic
+                response = await self._rate_limiter.execute_sync(
+                    Provider.ANTHROPIC,
+                    self.anthropic_sdk_client.beta.messages.create,
                     model=self.model,
                     max_tokens=self.max_tokens,
                     system=self.instructions

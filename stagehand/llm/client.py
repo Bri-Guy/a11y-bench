@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Callable, Optional
 import litellm
 
 from stagehand.metrics import get_inference_time_ms, start_inference_timer
+from stagehand.rate_limiter import Provider, get_provider_from_model, get_rate_limiter
 
 if TYPE_CHECKING:
     from ..logging import StagehandLogger
@@ -43,6 +44,7 @@ class LLMClient:
         self.logger = stagehand_logger
         self.default_model = default_model
         self.metrics_callback = metrics_callback
+        self._rate_limiter = get_rate_limiter(logger=stagehand_logger)
 
         # Warning:Prefer environment variables for specific providers.
         if api_key:
@@ -123,8 +125,15 @@ class LLMClient:
             # Start tracking inference time
             start_time = start_inference_timer()
 
-            # Use litellm's async completion function
-            response = await litellm.acompletion(**filtered_params)
+            # Determine provider for rate limiting
+            provider = get_provider_from_model(completion_model)
+
+            # Use rate limiter for API call with retry logic
+            response = await self._rate_limiter.execute(
+                provider,
+                litellm.acompletion,
+                **filtered_params,
+            )
 
             # Calculate inference time
             inference_time_ms = get_inference_time_ms(start_time)

@@ -17,6 +17,7 @@ from google.genai.types import (
 from pydantic import TypeAdapter
 
 from ..handlers.cua_handler import CUAHandler
+from ..rate_limiter import Provider, get_rate_limiter
 from ..types.agent import (
     ActionExecutionResult,
     AgentAction,
@@ -85,6 +86,7 @@ class GoogleCUAClient(AgentClient):
         )
 
         self.history: list[Content] = []
+        self._rate_limiter = get_rate_limiter(logger=logger)
 
     def format_screenshot(self, screenshot_base64: str) -> Part:
         """Formats a screenshot for the Gemini CUA model."""
@@ -499,7 +501,10 @@ class GoogleCUAClient(AgentClient):
 
             start_time = asyncio.get_event_loop().time()
             try:
-                model_response = self.genai_client.models.generate_content(
+                # Use rate limiter for API call with retry logic
+                model_response = await self._rate_limiter.execute_sync(
+                    Provider.GOOGLE,
+                    self.genai_client.models.generate_content,
                     model=self.model,
                     contents=self.history,
                     config=self._generate_content_config,

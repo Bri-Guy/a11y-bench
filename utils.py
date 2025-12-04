@@ -10,6 +10,8 @@ from typing import Any, Dict, List, Optional
 
 from pathlib import Path
 
+from stagehand.rate_limiter import Provider, get_rate_limiter
+
 
 def load_tasks(filepath: str = "data/accessibility_tasks.jsonl") -> List[Dict[str, Any]]:
     """Load accessibility tasks from a JSONL file."""
@@ -122,6 +124,7 @@ async def _verify_with_openai(
     from openai import OpenAI
     
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    rate_limiter = get_rate_limiter()
     
     prompt = _build_verification_prompt(
         initial_url=initial_url,
@@ -131,7 +134,10 @@ async def _verify_with_openai(
         agent_message=agent_message,
     )
     
-    response = client.chat.completions.create(
+    # Use rate limiter for API call with retry logic
+    response = await rate_limiter.execute_sync(
+        Provider.OPENAI,
+        client.chat.completions.create,
         model="gpt-4o",
         messages=[
             {
@@ -182,6 +188,7 @@ async def _verify_with_anthropic(
     from anthropic import Anthropic
     
     client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    rate_limiter = get_rate_limiter()
     
     prompt = _build_verification_prompt(
         initial_url=initial_url,
@@ -191,7 +198,10 @@ async def _verify_with_anthropic(
         agent_message=agent_message,
     )
     
-    response = client.messages.create(
+    # Use rate limiter for API call with retry logic
+    response = await rate_limiter.execute_sync(
+        Provider.ANTHROPIC,
+        client.messages.create,
         model="claude-sonnet-4-20250514",
         max_tokens=1024,
         messages=[
@@ -239,6 +249,7 @@ async def _verify_with_google(
     from google.genai import types
     
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    rate_limiter = get_rate_limiter()
     
     prompt = _build_verification_prompt(
         initial_url=initial_url,
@@ -251,7 +262,10 @@ async def _verify_with_google(
     initial_image_bytes = base64.b64decode(initial_screenshot_b64)
     final_image_bytes = base64.b64decode(final_screenshot_b64)
     
-    response = client.models.generate_content(
+    # Use rate limiter for API call with retry logic
+    response = await rate_limiter.execute_sync(
+        Provider.GOOGLE,
+        client.models.generate_content,
         model="gemini-2.0-flash",
         contents=[
             prompt,
