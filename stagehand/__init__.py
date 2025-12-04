@@ -10,6 +10,14 @@ from .logging import LogConfig, configure_logging
 from .main import Stagehand
 from .metrics import StagehandFunctionName, StagehandMetrics
 from .page import StagehandPage
+from .rate_limiter import (
+    Provider,
+    RateLimitConfig,
+    RateLimiter,
+    configure_rate_limiter,
+    get_provider_from_model,
+    get_rate_limiter,
+)
 from .schemas import (
     ActOptions,
     ActResult,
@@ -46,4 +54,10 @@ __all__ = [
     "StagehandFunctionName",
     "StagehandMetrics",
     "LogConfig",
+    "Provider",
+    "RateLimitConfig",
+    "RateLimiter",
+    "configure_rate_limiter",
+    "get_provider_from_model",
+    "get_rate_limiter",
 ]

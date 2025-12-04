@@ -13,6 +13,7 @@ from pydantic import (
 )  # Ensure BaseModel is imported for isinstance check
 
 from ..handlers.cua_handler import CUAHandler
+from ..rate_limiter import Provider, get_rate_limiter
 from ..types.agent import (
     ActionExecutionResult,
     AgentAction,
@@ -80,6 +81,7 @@ class OpenAICUAClient(AgentClient):
             },
         ]
         self.last_openai_tool_calls: Optional[list[Any]] = None
+        self._rate_limiter = get_rate_limiter(logger=logger)
 
     def format_screenshot(self, screenshot_base64: str) -> dict:
         """Formats a screenshot for the OpenAI CUA model."""
@@ -385,7 +387,9 @@ class OpenAICUAClient(AgentClient):
 
             start_time = asyncio.get_event_loop().time()
             try:
-                response = self.openai_sdk_client.responses.create(
+                response = await self._rate_limiter.execute_sync(
+                    Provider.OPENAI,
+                    self.openai_sdk_client.responses.create,
                     model=self.model,
                     input=current_input_items,
                     tools=self.tools,
