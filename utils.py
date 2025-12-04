@@ -134,7 +134,6 @@ async def _verify_with_openai(
         agent_message=agent_message,
     )
     
-    # Use rate limiter for API call with retry logic
     response = await rate_limiter.execute_sync(
         Provider.OPENAI,
         client.chat.completions.create,
@@ -198,7 +197,6 @@ async def _verify_with_anthropic(
         agent_message=agent_message,
     )
     
-    # Use rate limiter for API call with retry logic
     response = await rate_limiter.execute_sync(
         Provider.ANTHROPIC,
         client.messages.create,
@@ -262,7 +260,6 @@ async def _verify_with_google(
     initial_image_bytes = base64.b64decode(initial_screenshot_b64)
     final_image_bytes = base64.b64decode(final_screenshot_b64)
     
-    # Use rate limiter for API call with retry logic
     response = await rate_limiter.execute_sync(
         Provider.GOOGLE,
         client.models.generate_content,

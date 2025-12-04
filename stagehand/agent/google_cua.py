@@ -501,7 +501,6 @@ class GoogleCUAClient(AgentClient):
 
             start_time = asyncio.get_event_loop().time()
             try:
-                # Use rate limiter for API call with retry logic
                 model_response = await self._rate_limiter.execute_sync(
                     Provider.GOOGLE,
                     self.genai_client.models.generate_content,

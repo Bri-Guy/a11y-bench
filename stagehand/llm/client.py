@@ -128,7 +128,6 @@ class LLMClient:
             # Determine provider for rate limiting
             provider = get_provider_from_model(completion_model)
 
-            # Use rate limiter for API call with retry logic
             response = await self._rate_limiter.execute(
                 provider,
                 litellm.acompletion,

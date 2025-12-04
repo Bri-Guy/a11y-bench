@@ -387,7 +387,6 @@ class OpenAICUAClient(AgentClient):
 
             start_time = asyncio.get_event_loop().time()
             try:
-                # Use rate limiter for API call with retry logic
                 response = await self._rate_limiter.execute_sync(
                     Provider.OPENAI,
                     self.openai_sdk_client.responses.create,

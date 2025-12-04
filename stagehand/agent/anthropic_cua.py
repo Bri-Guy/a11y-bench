@@ -171,7 +171,6 @@ class AnthropicCUAClient(AgentClient):
                 if self.experimental:
                     compress_conversation_images(current_messages)
 
-                # Use rate limiter for API call with retry logic
                 response = await self._rate_limiter.execute_sync(
                     Provider.ANTHROPIC,
                     self.anthropic_sdk_client.beta.messages.create,
